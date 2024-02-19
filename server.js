@@ -1,4 +1,4 @@
-import 'express-async-errors'
+import 'express-async-errors';
 // asyncの中で生じたエラーをerrorミドルウェアにforwardするミドルウェア。一番最初にインポートすること。
 // errorミドルウェアは、単体ではasync内のエラーはキャッチできない。try-catchするか、このミドルを使うか。
 import * as dotenv from 'dotenv';
@@ -9,7 +9,10 @@ const app = express();
 import morgan from 'morgan';
 import mongoose from 'mongoose';
 
-import jobRouter from './routes/jobRouter.js'
+import jobRouter from './routes/jobRouter.js';
+
+import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
+
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -24,12 +27,18 @@ app.get('/', (req, res) => {
   res.send('Hello world');
 });
 
-app.post('/', (req, res) => {
-  res.json({ message: 'data received', data: req.body });
-  // JSONはキーにも””が必要だが、json()はJSのオブジェクトをJSONに変換してくれる。
-});
+// app.post(
+//   '/api/v1/test',
+//   validateTest,
+//   // express-validatorミドルで使うArrayを返す。validationと、validation結果を受けてのエラー対応(又はnext)を返す。
+//   (req, res) => {
+//     const { name } = req.body;
+//     res.json({ message: `hello ${name}` });
+//     // JSONはキーにも””が必要だが、json()はJSのオブジェクトをJSONに変換してくれる。
+//   }
+// );
 
-app.use('/api/v1/jobs', jobRouter)
+app.use('/api/v1/jobs', jobRouter);
 // 第一引数がjobRouterのprefix。
 // /api/v1/jobs/ にget,postがあった場合の対応、/api/v1/jobs/:idにget,patch,deleteがあった場合の対応を規定してる。
 // app.get('/api/v1/jobs', getAllJobs)のようにrouterを使わずに書くこともできるが、コード量が多くなる。
@@ -40,26 +49,22 @@ app.use('*', (req, res) => {
   // 但し、/api/v1/jobs/の後に何かしらの文字が入っているケースでは、:idとみなされて"idが見つからない"のエラーが生じる。
 });
 
-app.use((err, req, res, next) => {
-  console.log(err);
-  res.status(500).json({ msg: 'something went wrong' });
-});
+app.use(errorHandlerMiddleware);
 // errorのミドルウェアは、エンドポイントは存在するものの、何か他の理由でエラーが生じた場合に発動する。
 // コード内でthrow new Error(***)と書くと、このErrorミドルウェアが発動する。try-cqtchも同じ？？
 // *(not found)ミドルウェアよりも後で、一番最後に書くこと。
 
 const port = process.env.PORT || 5100;
 try {
-  await mongoose.connect(process.env.MONGO_URL)
+  await mongoose.connect(process.env.MONGO_URL);
   // 新機能により、asyncFnを書かなくてもawaitだけで使えるようになった。
   app.listen(port, () => {
     console.log(`server is running on PORT ${port}`);
   });
   // Expressのサーバーが、MongoDBと繋がった後にport5100を開いてClientからのリクエストを待つ。
 } catch (error) {
-  console.log(error)
-  process.exit(1)
+  console.log(error);
+  process.exit(1);
   // DBへの接続でエラーが生じた場合はapp.listenされずにエラー表示して強制終了する。
   // 1は、強制終了するためのコード。何か処理待ちの作業が残っていても終了する。
 }
-
