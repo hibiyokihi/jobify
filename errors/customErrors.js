@@ -18,6 +18,7 @@ export class BadRequestError extends Error {
     super(message)
     this.name = 'BadRequestError'
     this.statusCode = StatusCodes.BAD_REQUEST
+    // 400エラーが発出される。
   }
 }
 

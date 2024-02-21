@@ -31,3 +31,4 @@ const JobSchema = new mongoose.Schema(
 export default mongoose.model('Job', JobSchema);
 // MongoDBにモデルを作成するメソッド。第1引数にモデル名を渡すと、複数形でコレクションが作られる。
 // このケースでは、jobsというコレクションがMongoDBに作成される。
+// defaultエクスポートしてるから、インポートする際の名称は任意。

@@ -10,9 +10,9 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 
 import jobRouter from './routes/jobRouter.js';
+import authRouter from './routes/authRouter.js';
 
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
-
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -42,6 +42,8 @@ app.use('/api/v1/jobs', jobRouter);
 // 第一引数がjobRouterのprefix。
 // /api/v1/jobs/ にget,postがあった場合の対応、/api/v1/jobs/:idにget,patch,deleteがあった場合の対応を規定してる。
 // app.get('/api/v1/jobs', getAllJobs)のようにrouterを使わずに書くこともできるが、コード量が多くなる。
+
+app.use('/api/v1/auth', authRouter);
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' });

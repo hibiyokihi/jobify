@@ -22,7 +22,10 @@ router.route('/').get(getAllJobs).post(validateJobInput, createJob);
 router
   .route('/:id')
   .get(validateIdParam, getJob)
+  // validateIdParamミドルは、param('id')でrouteの:idを受け取る。
+  // idの型エラーがあればBadRequestErrorを発出し、idに該当するjobがなければNotFoundErrorを発出する。
   .patch(validateJobInput, validateIdParam, updateJob)
+  // validateJobInputは、body('company')等でreq.bodyの入力内容を受け取り、validationを実行する。
   .delete(validateIdParam, deleteJob);
 
 export default router;
