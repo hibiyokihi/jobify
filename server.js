@@ -8,17 +8,22 @@ import express from 'express';
 const app = express();
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
+// cookieにアクセスするためのミドルウェア
 
 import jobRouter from './routes/jobRouter.js';
 import authRouter from './routes/authRouter.js';
 
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
+import { authenticateUser } from './middleware/authMiddleware.js';
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   // コンソールにrequestの結果をログ表示するミドルウェア。リクエストエラーの原因把握に有用。引数には所定のオプションを指定。
   // production環境ではログ表示は不要だから、開発環境でのみmorganが動くようにする。
 }
+
+app.use(cookieParser());
 
 app.use(express.json());
 // サーバーからjsonを返すためのミドルがexpress.json()
@@ -27,23 +32,20 @@ app.get('/', (req, res) => {
   res.send('Hello world');
 });
 
-// app.post(
-//   '/api/v1/test',
-//   validateTest,
-//   // express-validatorミドルで使うArrayを返す。validationと、validation結果を受けてのエラー対応(又はnext)を返す。
-//   (req, res) => {
-//     const { name } = req.body;
-//     res.json({ message: `hello ${name}` });
-//     // JSONはキーにも””が必要だが、json()はJSのオブジェクトをJSONに変換してくれる。
-//   }
-// );
+app.use('/api/v1/jobs', authenticateUser, jobRouter);
 
-app.use('/api/v1/jobs', jobRouter);
 // 第一引数がjobRouterのprefix。
-// /api/v1/jobs/ にget,postがあった場合の対応、/api/v1/jobs/:idにget,patch,deleteがあった場合の対応を規定してる。
-// app.get('/api/v1/jobs', getAllJobs)のようにrouterを使わずに書くこともできるが、コード量が多くなる。
+// /api/v1/jobs/ にget,postがあった場合の対応、/api/v1/jobs/:idにget,patch,deleteがあった場合の対応をJobRouterが規定。
+// authenticateUserは、tokenによるログイン状態をチェックするミドルウェア。
+// jobRouterの前に挟むことで、/jobsに対する全てのリクエストについて事前にログインチェックを行うことができる。
+// authenticateUserは、req.cookiesにtokenがある場合には、loginコントローラーが作成したtokenと照合する。
+// 照合が取れたら、loginがtokenをcreateした際に指定したpayload項目をreq.userにくっつけてjobRouterにnextする。
+// jobRouter内では、req.user(このケースではuserId, role)を使うことができる。
 
 app.use('/api/v1/auth', authRouter);
+// authRouterの先、registerとloginそれぞれに対して入力内容のvalidationミドルを挟む。
+// loginは、入力されたemailとpasswordに合致するユーザーがいたら、tokenをcreateして、それをcookieに入れてフロントに送る。
+// フロントはそのcookieを一定期間保存して、request時にはreq.cookiesを含めてAPIにリクエストする。
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' });

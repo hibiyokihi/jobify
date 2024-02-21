@@ -18,7 +18,7 @@ export class BadRequestError extends Error {
     super(message)
     this.name = 'BadRequestError'
     this.statusCode = StatusCodes.BAD_REQUEST
-    // 400エラーが発出される。
+    // 400エラーを返す。
   }
 }
 
@@ -27,6 +27,7 @@ export class UnauthenticatedError extends Error {
     super(message)
     this.name = 'UnauthenticatedError'
     this.statusCode = StatusCodes.UNAUTHORIZED
+    // 401エラーを返す。
   }
 }
 

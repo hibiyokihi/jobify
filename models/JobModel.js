@@ -22,6 +22,11 @@ const JobSchema = new mongoose.Schema(
       type: String,
       default: 'my city',
     },
+    createdBy: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+      // 各jobインスタンスは特定のuserに紐づくようにする。UserモデルとuserIdで紐付ける。
+    }
   },
   { timestamps: true }
   // 第2引数のtimestampsをtrueにすると、createdAtとupdatedAtフィールドが作成される。

@@ -3,9 +3,11 @@ import { StatusCodes } from 'http-status-codes';
 // status(400)等、statusCodeを覚えるのは大変だから、代わりに分かりやすい言葉で置き換えてくれるライブラリ。
 
 export const getAllJobs = async (req, res) => {
+  console.log(req.user)
+  // req.userは、authMiddlewareでtokenのverificationを経て作成されるため、未認証で使ってしまうリスクを防げる。
   const jobs = await Job.find({});
   // モデルの全てのインスタンスを取り出す場合。
-  res.status(StatusCodes.OK).json(jobs);
+  res.status(StatusCodes.OK).json({jobs});
 };
 
 export const createJob = async (req, res) => {
@@ -20,7 +22,7 @@ export const getJob = async (req, res) => {
   const { id } = req.params;
   const job = await Job.findById(id);
   // findById(req.params.id)としてもOK
-  res.status(StatusCodes.OK).json(job);
+  res.status(StatusCodes.OK).json({ job });
 };
 
 export const updateJob = async (req, res) => {
