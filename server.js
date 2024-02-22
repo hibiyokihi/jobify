@@ -13,7 +13,7 @@ import cookieParser from 'cookie-parser';
 
 import jobRouter from './routes/jobRouter.js';
 import authRouter from './routes/authRouter.js';
-import userRouter from './routes/userRouter.js'
+import userRouter from './routes/userRouter.js';
 
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
 import { authenticateUser } from './middleware/authMiddleware.js';
@@ -33,6 +33,10 @@ app.get('/', (req, res) => {
   res.send('Hello world');
 });
 
+app.get('/api/v1/test', (req, res) => {
+  res.json({ msg: 'test route' });
+});
+
 app.use('/api/v1/jobs', authenticateUser, jobRouter);
 
 // 第一引数がjobRouterのprefix。
@@ -48,7 +52,7 @@ app.use('/api/v1/auth', authRouter);
 // loginは、入力されたemailとpasswordに合致するユーザーがいたら、tokenをcreateして、それをcookieに入れてフロントに送る。
 // フロントはそのcookieを一定期間保存して、request時にはreq.cookiesを含めてAPIにリクエストする。
 
-app.use('/api/v1/users', authenticateUser, userRouter)
+app.use('/api/v1/users', authenticateUser, userRouter);
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' });
