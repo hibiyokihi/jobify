@@ -87,7 +87,7 @@ export const validateRegisterInput = withValidationErrors([
       if (user) {
         throw new BadRequestError('user already exists');
       }
-      // 引数にはbodyの'email'のバリューが入る。既にDBに存在するemailなら、登録済みのユーザー。
+      // 引数にはreq.bodyの'email'のバリューが入る。既にDBに存在するemailなら、登録済みのユーザー。
     }),
   body('password')
     .notEmpty()
@@ -107,4 +107,27 @@ export const validateLoginInput = withValidationErrors([
   body('password')
     .notEmpty()
     .withMessage('password is required.')
+]);
+
+export const validateUpdateUserInput = withValidationErrors([
+  body('name').notEmpty().withMessage('name is required.'),
+  body('email')
+    .notEmpty()
+    .withMessage('email is required.')
+    .isEmail()
+    .withMessage('invalid email format')
+    .custom(async (email, {req}) => {
+      const user = await User.findOne({ email });
+      // emailがupdate前と同じものであれば、当然にDBには本人のemailが存在するからuserにはログインユーザー本人が入る。
+      // updateによりemailを変更する場合には、新しいemailはDBには無いはずだからuserにはundifinedが入るはず。
+      if (user && user._id.toString() !== req.user.userId) {
+        throw new BadRequestError('user already exists');
+      }
+      // email変更なしのケースでは、userにはログインユーザー本人が入っている。これは正常。
+      // よって、userがある場合にはuser._idとログインユーザーのuserIdが一致してれば正常。もし不一致ならエラー。
+      // このエラーケースは、他の登録ユーザーのemailに変更しようとした時。emailがDB上にあるが、本人ではないケース。
+    }),
+
+  body('lastName').notEmpty().withMessage('last name is required'),
+  body('location').notEmpty().withMessage('location is required'),
 ]);

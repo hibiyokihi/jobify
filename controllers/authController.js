@@ -48,3 +48,12 @@ export const login = async (req, res) => {
 
   res.status(StatusCodes.OK).json({ msg: 'user logged in' });
 };
+
+export const logout = async (req, res) => {
+  res.cookie('token', 'logout', {
+    httpOnly: true,
+    expires: new Date(Date.now())
+  })
+  // フロントのcookiesに保存された’token'を上書きするcookieを送る。上書きして即expireするから、上書きするものは何でも良い。
+  res.status(StatusCodes.OK).json({msg: 'user logged out'})
+}

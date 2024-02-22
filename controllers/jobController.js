@@ -3,14 +3,16 @@ import { StatusCodes } from 'http-status-codes';
 // status(400)等、statusCodeを覚えるのは大変だから、代わりに分かりやすい言葉で置き換えてくれるライブラリ。
 
 export const getAllJobs = async (req, res) => {
-  console.log(req.user)
-  // req.userは、authMiddlewareでtokenのverificationを経て作成されるため、未認証で使ってしまうリスクを防げる。
-  const jobs = await Job.find({});
-  // モデルの全てのインスタンスを取り出す場合。
+  const jobs = await Job.find({createdBy: req.user.userId});
+  // req.userは、authMiddlewareでtokenのverificationを経て作成されるため、未認証でuserを使ってしまうリスクを防げる。
+  // loginした際にauthMiddlewareによりreq.userが付け加えられる。そこからuserIdを取ってきてログインユーザーのJobを取得。
   res.status(StatusCodes.OK).json({jobs});
 };
 
 export const createJob = async (req, res) => {
+  req.body.createdBy = req.user.userId
+  // JobモデルのcreatedByフィールドは、フォーム入力ではなくログインユーザー情報から自動的に取ってくるようにする。
+  // jobRouter内にある全てのcontrollerはauthMiddlewareを通しているから、login後の状態でreq.userを持っている。
   const job = await Job.create(req.body);
   // スキーマと入力内容を元にモデルインスタンスが作成される。IDはMongoDBが自動作成する。
   res.status(StatusCodes.CREATED).json({ job });

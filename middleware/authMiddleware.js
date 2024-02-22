@@ -1,7 +1,7 @@
 import { UnauthenticatedError } from '../errors/customErrors.js';
 import { verifyJWT } from '../utils/tokenUtils.js';
 
-export const authenticateUser = async (req, res, next) => {
+export const authenticateUser = (req, res, next) => {
   const { token } = req.cookies;
   // cookiesは、cookieParserライブラリをapp.use()することで使えるようになる。
   // authControllersのloginに、tokenのクッキー名をtokenに設定したから、req.cookies.tokenで呼び出せる。

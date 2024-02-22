@@ -13,6 +13,7 @@ import cookieParser from 'cookie-parser';
 
 import jobRouter from './routes/jobRouter.js';
 import authRouter from './routes/authRouter.js';
+import userRouter from './routes/userRouter.js'
 
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
 import { authenticateUser } from './middleware/authMiddleware.js';
@@ -46,6 +47,8 @@ app.use('/api/v1/auth', authRouter);
 // authRouterの先、registerとloginそれぞれに対して入力内容のvalidationミドルを挟む。
 // loginは、入力されたemailとpasswordに合致するユーザーがいたら、tokenをcreateして、それをcookieに入れてフロントに送る。
 // フロントはそのcookieを一定期間保存して、request時にはreq.cookiesを含めてAPIにリクエストする。
+
+app.use('/api/v1/users', authenticateUser, userRouter)
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' });
