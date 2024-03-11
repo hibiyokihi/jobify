@@ -6,15 +6,15 @@ import { createJWT } from '../utils/tokenUtils.js';
 
 export const register = async (req, res) => {
   const isFirstAccount = (await User.countDocuments()) === 0;
+  // MongoDBでは、CollectionとDocumentでデータが構成されている。countDocumentsはUserの数を数える。
+  // Userの数がゼロということは、一人目の登録者であるということ。今回は、一人目の登録者のrollをadminとする。
   req.body.role = isFirstAccount ? 'admin' : 'user';
   req.body.password = await hashPassword(req.body.password);
-
-  // const salt = await bcrypt.genSalt(10)
-  // const hashedPassword = await bcrypt.hash(req.body.password, salt)
-  // req.body.password = hashedPassword
+  // bcryptを使った自作の関数。入力されたパスワードを受けてハッシュしたものを返す。
+  // asyncFnだが、使用前にawaitする必要があるのか？？
 
   const user = await User.create(req.body);
-  // req.body内のpasswordは上記で上書き後のもの。
+  // req.body内のpasswordは上記でハッシュ後のもの。
   res.status(StatusCodes.CREATED).json({ msg: 'user was created' });
   // registerの際には登録情報をres.jsonする必要は一般的には無い。もし返す場合には、passwordを含めないよう気を付ける。
 };
@@ -24,13 +24,15 @@ export const login = async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) throw new UnauthenticatedError('invalid credentials');
   const isPasswordCorrect = await comparePassword(password, user.password);
-  // 基本的に、asyncFnを使う時はawaitするということだろう。
+  // bcryptを使った自作の関数。ハッシュ前と後のパスワードを受けて一致を確認する。
   if (!isPasswordCorrect) throw new UnauthenticatedError('invalid credentials');
+  // 以下のように書くこともできる。user=trueならpasswordの一致をチェックする。
   // const isValidUser = user && (await comparePassword(password, user.password))
-  // 上記のように書くこともできる。user=falseならその時点でfalse、user=trueならpasswordをチェックする。
+  // if (!isValidUser) throw new UnauthenticatedError('invalid credentials');
 
   const token = createJWT({ userId: user._id, role: user.role });
-  // ここで指定したpayload項目が、後にverifyJWT(token)がリターンする値となる。_idはMongoDBが自動作成するid。
+  // ここで指定したpayload項目が、後にverifyJWT(token)がリターンする値となる。
+  // user.roleには、registerの際にadmin又はuserが設定されている。_idはモデルをcreate()した際にMongoDBが作成。
   const oneDay = 1000 * 60 * 60 * 24;
 
   res.cookie('token', token, {
@@ -42,7 +44,7 @@ export const login = async (req, res) => {
     // JWTのexpiredInとは異なり、cookieのexpiresは期日を指定する。Date.now()に足すにはミリ秒単位にする必要がある。
     secure: process.env.NODE_ENV === 'production',
     // trueにすると、httpではなくhttpsの場合のみ、このクッキーを送ることができる。
-    // 開発中のlocalhostはhttpだからfalseである必要があり、productionフェーズに入るとtrueに切り替わるようにする。
+    // 開発中のlocalhostはhttpだからfalseにしておく必要がある。NODE_ENVはproductionフェーズに入ると自動的にtrueに切り替わる。
   });
   // サーバーからtokenを送ってフロントでlocalStorageに保存するやり方もあるが、localはJSを使ってアクセスできるからリスク有る。
 
@@ -54,6 +56,6 @@ export const logout = async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now())
   })
-  // フロントのcookiesに保存された’token'を上書きするcookieを送る。上書きして即expireするから、上書きするものは何でも良い。
+  // フロントのcookiesに保存された’token'を上書きするcookieを送る。上書きして即expireするから、上書きするものは何でも良い。(ここでは'logout')
   res.status(StatusCodes.OK).json({msg: 'user logged out'})
 }

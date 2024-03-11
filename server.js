@@ -21,7 +21,7 @@ import { authenticateUser } from './middleware/authMiddleware.js';
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   // コンソールにrequestの結果をログ表示するミドルウェア。リクエストエラーの原因把握に有用。引数には所定のオプションを指定。
-  // production環境ではログ表示は不要だから、開発環境でのみmorganが動くようにする。
+  // production環境ではログ表示は不要だから、開発環境でのみmorganが動くようにする。それがdevオプション。
 }
 
 app.use(cookieParser());
@@ -48,7 +48,6 @@ app.use('/api/v1/jobs', authenticateUser, jobRouter);
 // jobRouter内では、req.user(このケースではuserId, role)を使うことができる。
 
 app.use('/api/v1/auth', authRouter);
-// authRouterの先、registerとloginそれぞれに対して入力内容のvalidationミドルを挟む。
 // loginは、入力されたemailとpasswordに合致するユーザーがいたら、tokenをcreateして、それをcookieに入れてフロントに送る。
 // フロントはそのcookieを一定期間保存して、request時にはreq.cookiesを含めてAPIにリクエストする。
 
