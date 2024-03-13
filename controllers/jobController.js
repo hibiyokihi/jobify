@@ -12,7 +12,6 @@ export const getAllJobs = async (req, res) => {
 export const createJob = async (req, res) => {
   req.body.createdBy = req.user.userId
   // JobモデルのcreatedByフィールドは、フォーム入力ではなくログインユーザー情報から自動的に取ってくるようにする。
-  // jobRouter内にある全てのcontrollerはauthMiddlewareを通しているから、login後の状態でreq.userを持っている。
   const job = await Job.create(req.body);
   // スキーマと入力内容を元にモデルインスタンスが作成される。IDはMongoDBが自動作成する。
   res.status(StatusCodes.CREATED).json({ job });
@@ -22,6 +21,7 @@ export const createJob = async (req, res) => {
 
 export const getJob = async (req, res) => {
   const { id } = req.params;
+  // req.paramsで'/api/v1/jobs/:id'のidを取り出せる。
   const job = await Job.findById(id);
   // findById(req.params.id)としてもOK
   res.status(StatusCodes.OK).json({ job });
@@ -32,7 +32,7 @@ export const updateJob = async (req, res) => {
   const updatedJob = await Job.findByIdAndUpdate(id, req.body, {
     new: true,
   });
-  // 第2引数には、body全体を渡してあげればESが必要な部分を拾って対応してくれる。
+  // 第2引数にreq.body全体を渡してあげれば、ES6は変更箇所を探してupdateしてくれる。
   // 第3引数のオプションにnewを設定すると、更新後のインスタンスを返してくれる（デフォルトは更新前のものを返す）
   res.status(StatusCodes.OK).json({ msg: 'job modified', job: updatedJob });
 };

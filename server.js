@@ -39,7 +39,7 @@ app.get('/api/v1/test', (req, res) => {
 
 app.use('/api/v1/jobs', authenticateUser, jobRouter);
 
-// 第一引数がjobRouterのprefix。
+// '/api/v1/jobs'がjobRouterのprefix。
 // /api/v1/jobs/ にget,postがあった場合の対応、/api/v1/jobs/:idにget,patch,deleteがあった場合の対応をJobRouterが規定。
 // authenticateUserは、tokenによるログイン状態をチェックするミドルウェア。
 // jobRouterの前に挟むことで、/jobsに対する全てのリクエストについて事前にログインチェックを行うことができる。

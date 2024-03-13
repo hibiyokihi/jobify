@@ -7,6 +7,7 @@ export const authenticateUser = (req, res, next) => {
   // authControllersのloginに、tokenのクッキー名をtokenに設定したから、req.cookies.tokenで呼び出せる。
   if (!token) throw new UnauthenticatedError('authentication invalid');
   // api/v1/jobsに対してリクエストがあった際に、リクエストの中にcookies.tokenがなければエラーを出す。
+  // logoutするとreq.cookies.tokenの内容が'logout'になるように規定してる。この場合、正しくエラーをキャッチできる？
 
   try {
     const { userId, role } = verifyJWT(token);
@@ -16,6 +17,8 @@ export const authenticateUser = (req, res, next) => {
     throw new UnauthenticatedError(
       'authentication invalid, virification failed'
     );
+    // logoutするとtokenが'logout'になるからuserIdとrollが無く、req.userはnullとしてnextされるのか？
+    // それともtokenが'logout'だとエラーキャッチされるのか？
   }
 };
 // このミドルウェアに飛んできたreqにcookies.tokenが有るかを確認する。

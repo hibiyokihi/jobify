@@ -7,15 +7,15 @@ import Job from '../models/JobModel.js';
 import User from '../models/UserModel.js';
 
 const withValidationErrors = (validateValues) => {
-  // express-validatorミドルウェアでvalidationする際、このFnを使い回すことができる。引数のvalidationだけ変えればOK。
-  // express-validatorは、pathと処理Fnの間にArrayを置き、Arrayの1つ目にvalidation、2つ目にvalidation結果を受けての対応を書く。
-  // この関数はvalidationを引数に受けて、express-validatorに必要なArrayを返すためのもの。
+  // express-validatorミドルを使う場合、Arrayで記載する。Arrayの1つ目にvalidation、2つ目にvalidation結果を受けての処理を記載。
+  // このヘルパーFnを規定することで、引数に渡すvalidationの中身を変えるだけで使い回せる。(処理内容は同じだから)　
   return [
     validateValues,
-    // この関数を呼び出す際に渡したexpress-validatorのvalidation。
+    // 第一引数はvalidation。この部分は固有のものだから各validatorの方で規定する。
     (req, res, next) => {
+      // 第二引数は処理内容。エラーが無ければNext、有ればその内容に応じてエラーを発出する。
       const errors = validationResult(req);
-      // 第一引数のvalidationの結果が入り、エラーがあればerrors.arrayにエラー内容が入る。
+      // validationの結果が入り、エラーがあればerrors.arrayにエラー内容が入る。
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map((error) => error.msg);
         if (errorMessages[0].startsWith('cannot find')) {

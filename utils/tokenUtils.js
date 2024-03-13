@@ -12,5 +12,6 @@ export const createJWT = (payload) => {
 export const verifyJWT = (token) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET)
   // 引数に渡されたtokenが、createJWTで作成されたものと一致することを確認し、生成時にpayloadに指定した項目を返す。
+  // logoutするとtokenの値が'logout'になるよう規定したが、この場合は何がリターンされるか？？
   return decoded
 }
