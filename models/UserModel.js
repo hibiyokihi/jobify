@@ -21,7 +21,8 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.methods.toJSON = function(){
   let obj = this.toObject()
-  // このUserインスタンス(this)をオブジェクト形式に変換する。これによりobj.passwordでパスワードにアクセスできる。
+  // resの際にpasswordを除きたいからtoJSONメソッドを上書きする。
+  // 呼び出し元のUserインスタンス(this)をオブジェクト形式に変換する。これによりobj.passwordでパスワードにアクセスできる。
   // この後でobjの中身を変更するからletを使う。
   delete obj.password
   return obj

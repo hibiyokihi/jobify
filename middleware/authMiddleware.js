@@ -13,6 +13,9 @@ export const authenticateUser = (req, res, next) => {
     const { userId, role } = verifyJWT(token);
     req.user = { userId, role };
     next();
+    // user情報がダイレクトに取り出せるのは危険だから、cookieにはtokenを保存し、tokenの中にユーザー情報が含まれるようにする。
+    // jwt.signで作られたtokenは、jwt.verifyでのみ中身のpayloadを取り出せる。
+    // 取り出したユーザー情報はフロント側で保管せず、req.userに設定することで、そのreqでのみユーザー情報が扱える。
   } catch (error) {
     throw new UnauthenticatedError(
       'authentication invalid, virification failed'
@@ -28,13 +31,11 @@ export const authenticateUser = (req, res, next) => {
 
 export const authorizePermissions =
   (...roles) =>
+  // この処理を行う権限を持つroleを引数に受ける。引数が一つでもスプレッドすることでArray形式になり、includeメソッドを適用できる。
   (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       throw new UnauthorizedError('Unauthorized to access this route');
+      // ユーザーのroleが引数で渡された権限者roleに含まれていなければ、Unauthorizedエラーとなる。
     }
     next();
-    // 引数を受け取ってミドルウェア関数をリターンする。
-    // 引数で指定したroleを持つ人にのみ、permissionを与える(nextすることを許可)。
-    // 引数をスプレッドすることによりArray扱いとなり、includesメソッドを適用できる。
-    // ユーザーのroleがアクセスが許可されたroleの中に含まれていなければ、Unauthorizedエラーとなる。
   };

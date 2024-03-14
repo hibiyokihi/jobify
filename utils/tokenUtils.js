@@ -4,7 +4,8 @@ export const createJWT = (payload) => {
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-  // 引数に渡されたpayload項目が、後にverifyJWT(token)がリターンする値となる。
+  // user情報をダイレクトにcookieに入れるのは危険。cookieにはtokenを保存し、tokenの中にユーザー情報が含まれるようにする。
+  // loginから引き渡されたpayload(userId, roll)が、後にverifyJWT(token)がリターンする値となる。
 
   return token;
 };

@@ -1,7 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 
+// カスタムErrorクラスを規定している。
+// throw new NotFoundError(エラーメッセージ)のように使用する。
+
 export class NotFoundError extends Error{
-  // Errorクラスは、"throw new Error()"の時に使うあれ。NotFound用にカスタマイズしてる。
   constructor(message) {
     // インスタンスが作られる際には、引数に入れたエラーメッセージがmessageで渡される。
     super(message)

@@ -4,8 +4,8 @@ import { StatusCodes } from 'http-status-codes';
 
 export const getAllJobs = async (req, res) => {
   const jobs = await Job.find({createdBy: req.user.userId});
-  // req.userは、authMiddlewareでtokenのverificationを経て作成されるため、未認証でuserを使ってしまうリスクを防げる。
-  // loginした際にauthMiddlewareによりreq.userが付け加えられる。そこからuserIdを取ってきてログインユーザーのJobを取得。
+  // 先にauthenticateUserミドルが呼ばれてるから、verifyJWT後でreq.userが付いた状態で呼び出される。
+  // ミドルとコントローラー間は一つのrequestとして扱われるが、一連が終わればreqは終了し、ユーザー情報もreqと共に消える。
   res.status(StatusCodes.OK).json({jobs});
 };
 

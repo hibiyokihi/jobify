@@ -60,9 +60,8 @@ app.use('*', (req, res) => {
 });
 
 app.use(errorHandlerMiddleware);
-// errorのミドルウェアは、エンドポイントは存在するものの、何か他の理由でエラーが生じた場合に発動する。
-// コード内でthrow new Error(***)と書くと、このErrorミドルウェアが発動する。try-cqtchも同じ？？
-// *(not found)ミドルウェアよりも後で、一番最後に書くこと。
+// Errorミドルウェア。*(not found)ミドルウェアよりも後で、一番最後に書くこと。
+// 一番最後に書くことでErrorミドルと認識されるのか？引数の最初にerrを入れることでErrorミドルとして認識されるのか？
 
 const port = process.env.PORT || 5100;
 try {
