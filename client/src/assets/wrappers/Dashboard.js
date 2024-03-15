@@ -14,7 +14,7 @@ const Wrapper = styled.section`
     .dashboard {
       grid-template-columns: auto 1fr;
     }
-    // 小さい画面の時は1列グリッド、大きい画面の時は2列グリッドで左側はBigSidebarに必要な幅を提供
+    // 大きい画面の時は2列グリッドで左側はBigSidebarに必要な幅を残す
     .dashboard-page {
       width: 90%;
     }

@@ -14,17 +14,19 @@ const NavLinks = ({isBigSidebar}) => {
           key={text}
           className="nav-link"
           onClick={!isBigSidebar && toggleSidebar}
-          // SmallSidebarからの呼び出し時はisBigSidebarは渡されないからNull、よってonClickにはトグルがセットされる。
-          // BigSidebarからの呼び出し時は渡されるからFalseになってtoggleはセットされない。
+          // 大画面の時はサイドバーをトグルさせず表示したまま、小画面の時だけトグルしたい。
+          // SmallSidebarでNavLinksを呼び出す時はpropsにisBigSidebarが無いからNull、よってトグルされる。
+          // BigSidebarでNavLinksを呼び出す時はpropsにisBigSidebarを渡すからトグルはセットされない。
           end
-          // NavLinkはRoute上でdashboardの階層にあり、そのトップページであるAddJobは常にアクティブ扱いになってしまう。
-          // endを付けることで、これを回避できる。
+          // activeクラスを付けるエレメントを判断する際、pathの終わりまで見る時はendをつける。
+          // endを付けないと、ルートパスであるAddJob(/dashboard/)は常にアクティブ扱いされてしまう。
         >
           <span className="icon">{icon}</span>
           {text}
         </NavLink>
       );
-      // NavLinkとLinkの違いの一つは、NavLink内の選択中の要素にはactiveクラスが付く。
+      // NavLinkとLinkの違いとして、NavLinkは選択中の要素にactiveクラスが付く。
+      // styled-componentsを使った場合、そのコンポ内で呼び出した他のコンポにも適用される(nav-linkクラスのこと)
     })}
   </div>
   )

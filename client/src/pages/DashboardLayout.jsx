@@ -55,7 +55,8 @@ const DashboardLayout = () => {
     >
       <Wrapper>
         <main className="dashboard">
-          {/* 小さい画面の時は1列グリッド、大きい画面の時は2列グリッドで左側はSidebarに必要な幅を提供 */}
+          {/* 小さい画面の時は1列グリッドでSmallSidebarはモーダルにしてメインを表示する。ハンバーガーでトグル。 */}
+          {/* 大きい画面の時は2列グリッドでBigSidebarとメインを左右に並べる。サイドバーは左に隠して、トグルで右移動して表示 */}
           <SmallSidebar />
           <BigSidebar />
           <div>

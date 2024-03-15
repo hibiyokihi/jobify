@@ -10,6 +10,7 @@ const SmallSidebar = () => {
   return (
     <Wrapper>
       <div className={`sidebar-container ${showSidebar && 'show-sidebar'}`}>
+        {/* showSidebarクラスが付いてない時は、下記サイドバーは隠れてメインコンテンツだけ表示される */}
         <div className="content">
           <button type="button" className="close-btn" onClick={toggleSidebar}>
             <FaTimes />

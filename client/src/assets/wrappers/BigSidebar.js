@@ -3,7 +3,9 @@ import styled from 'styled-components';
 const Wrapper = styled.aside`
   display: none;
   /* 小さい画面の時はBigSidebarは非表示にしてる */
+
   @media (min-width: 992px) {
+    /* サイドバーは基本は左に隠れるようにして、show-sidebarクラスが付くと右移動して表示される。 */
     display: block;
     box-shadow: 1px 0px 0px 0px rgba(0, 0, 0, 0.1);
     .sidebar-container {

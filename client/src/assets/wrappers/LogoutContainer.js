@@ -15,6 +15,7 @@ const Wrapper = styled.div`
   }
   .dropdown {
     /* これは中身のbuttonではなく箱であるdivに対して付いているクラスであることに注意 */
+    /* visibilityのデフォルトをhiddenとして、show-dropdownが付くと見えるように上書きされる */
     position: absolute;
     top: 45px;
     left: 0;
@@ -25,7 +26,6 @@ const Wrapper = styled.div`
     border-radius: var(--border-radius);
     background: var(--primary-500);
   }
-  /* visibilityのデフォルトをhiddenとして、show-dropdownが付くとvisibleに上書きされる */
   .show-dropdown {
     visibility: visible;
   }
