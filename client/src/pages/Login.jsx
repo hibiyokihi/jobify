@@ -13,7 +13,7 @@ const Login = () => {
         {/* defaultValueを設定してるのは、テストする時にいちいち入力する手間を省くため。本番用では消す。 */}
 
         <button type="submit" className="btn btn-block">
-          submit
+          login
         </button>
         <button type="button" className="btn btn-block">
           explor the app

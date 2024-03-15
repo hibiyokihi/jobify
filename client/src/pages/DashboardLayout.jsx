@@ -6,25 +6,31 @@ import { checkDefaultTheme } from '../App';
 
 const DashboardContext = createContext();
 // global contextを使う場合、createContextから作ったProviderで全体を囲う。
-// Providerに使いたいstateをvalueに渡し、使う際にはuseContext()で呼び出す。
+// contextで使いたいstateをProviderのvalueに渡し、使う際にはuseContext()で呼び出す。
 // このケースのglobal stateであれば、少ないからcontextは使わずにpropsで渡してもOK。
 
 const DashboardLayout = () => {
   const user = { name: 'suzu' };
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(checkDefaultTheme());
+  // useState()の初期値を決める関数は、マウント時に一回だけ実行される。
+  // checkDefaultThemeは、localStorageの'darkTheme'のtrue/falseを返す。
+  // 同時に、そのtrue/falseに応じて'dark-theme'クラスの追加/削除を行う。
 
   const toggleDarkTheme = () => {
     setIsDarkTheme((prev) => !prev);
+    // setStateは最後にまとめて実行されるから、この関数内ではisDarkThemeはまだトグル前の状態。
     document.body.classList.toggle('dark-theme', !isDarkTheme);
-    // element(ここではbodyエレメント)に指定クラス名(ここでは'dark-theme')が付いてれば削除し、無ければ追加する。
-    // 第1引数だけでは動かないこともあるようで、第2引数で挙動を強制する。第2がtrueなら追加、falseなら削除。
-    // つまり、現状のisDarkThemeがfalseならbodyタグに'dark-theme'を追加、trueなら削除
-    // ※バニラJSの機能でありReactとは関係ない。
-    // setStateは最後にまとめて実行されるから、isDarkThemeはまだトグル前の状態。
+    // localStorageの'darkTheme'が現状trueの場合、stateのisDarkThemeもtrueになり、'dark-theme'クラスが付いている。
+    // toggleの第2引数にfalseにすることで、'dark-theme'クラスを取り除く一方通行の処理がされる。
+    // 逆に'darkTheme'が現状falseの場合、toggleの第2引数はtrueになり、'dark-theme'クラスを追加する一方通行処理がされる。
+
+    // classListは、特定の要素のクラス名をadd, remove, toggle, contain(存在確認) できるプロパティ。
+    // toggleは、引数1つの場合には、単純にその要素内にそのクラスが有れば除き、無ければ追加する。
+    // toggleの第2引数にbooleanを置いた場合、トグルを一方通行にできる。trueなら追加のみ、falseなら削除のみ。
+
     localStorage.setItem('darkTheme', !isDarkTheme);
-    // 通常モードの時にトグルを押した場合はダークモードに変更する。isDarkThemeはまだfalseだからlocalのdarkThemeには'true'が入る。
-    // ダークモードの時にトグルを押した場合は通常モードに変更する。isDarkThemeがtrueだからlocalのdarkThemeには'false'が入る。
+    // 上記は、ローカルStateのトグルと'dark-theme'クラスの修正をしただけだから、localStorageのトグルも必要。
   };
 
   const toggleSidebar = () => {
@@ -45,6 +51,7 @@ const DashboardLayout = () => {
         toggleSidebar,
         logoutUser,
       }}
+      // <DashboardLayout>の子elementにおいて、上記のstateをcontextから呼び出せる。
     >
       <Wrapper>
         <main className="dashboard">
@@ -64,7 +71,8 @@ const DashboardLayout = () => {
   );
 };
 export const useDashboardContext = () => useContext(DashboardContext);
-// 普通のやり方だと、使う側でuseContextとDashboardContextをインポートする必要がある。
-// カスタムHookにすることで、これ一つをインポートすればcontextを使える様になる。カスタムhookを作る際の名前の頭にはuseをつける。
+// 普通のやり方だと、使う側でいちいちuseContextとDashboardContextをインポートする必要がある。
+// カスタムHookにすることで、これ一つをインポートすればcontextを使える様になる。
+// カスタムhookを作る際の名前の頭にはuseをつけること。
 
 export default DashboardLayout;

@@ -12,6 +12,7 @@ const Wrapper = styled.section`
   .page {
     min-height: calc(100vh - var(--nav-height));
     display: grid;
+    /* 大きい画面になった時に2列グリッドにするためにgridにしてる。小さい画面の時はグリッドの意味はない。 */
     align-items: center;
     margin-top: -3rem;
   }
