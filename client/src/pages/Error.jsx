@@ -5,6 +5,7 @@ import img from '../assets/images/not-found.svg';
 const Error = () => {
   const error = useRouteError();
   // Routeの中で発生したエラーをキャッチしてくれるHook。
+  // 404とそれ以外で場合分けしている。
   if (error.status === 404) {
     return (
       <Wrapper>

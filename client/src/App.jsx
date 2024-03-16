@@ -15,6 +15,9 @@ import {
 // pages/index.jsからまとめてインポートしている。ファイル名の指定が無ければデフォルトでindex.jsから探してくる。
 // index.jsに集約しないと、page毎にインポートを記載する必要があるから行数が多くなる。
 
+import {action as registerAction} from './pages/Register'
+// actionはreact-router-domで使ってるから、他のエイリアスを用意する必要がある。
+
 export const checkDefaultTheme = () => {
   // DashboardLayout.jsxでも使うからエクスポートしてる。
   const isDarkTheme = localStorage.getItem('darkTheme') === 'true'
@@ -56,6 +59,9 @@ const router = createBrowserRouter([
       {
         path: 'register',
         element: <Register />,
+        action: registerAction
+        // formをsubmitした場合の処理を規定する。
+        // actionに記載するFnでは、必ず何かをreturnする必要がある。
       },
       {
         path: 'login',
