@@ -15,15 +15,18 @@ import {
 // pages/index.jsからまとめてインポートしている。ファイル名の指定が無ければデフォルトでindex.jsから探してくる。
 // index.jsに集約しないと、page毎にインポートを記載する必要があるから行数が多くなる。
 
-import {action as registerAction} from './pages/Register'
+import { action as registerAction } from './pages/Register';
 // actionはreact-router-domで使ってるから、他のエイリアスを用意する必要がある。
+// RegisterとLoginで同じ名前(action)でexportすることで、コードを再利用できる。
+import { action as loginAction } from './pages/Login';
+import { loader as dashboardLoader } from './pages/DashboardLayout';
 
 export const checkDefaultTheme = () => {
   // DashboardLayout.jsxでも使うからエクスポートしてる。
-  const isDarkTheme = localStorage.getItem('darkTheme') === 'true'
+  const isDarkTheme = localStorage.getItem('darkTheme') === 'true';
   // localStorageのvalueはstringで保存される。これをbooleanに直すために上記のように書く。
   // DashboardLayoutのtoggleDarkTheme関数を合わせて参照
-  document.body.classList.toggle('dark-theme', isDarkTheme)
+  document.body.classList.toggle('dark-theme', isDarkTheme);
   // htmlのbodyには元々'dark-theme'クラスは付いてないから、画面をリフレッシュすると消えてしまう。
   // localStorageの'darkTheme'の値に応じて、レンダー時にhtmlのクラスを正しい状態に修正するのが目的。
 
@@ -32,10 +35,10 @@ export const checkDefaultTheme = () => {
   // toggleの第2引数にbooleanを置いた場合、トグルを一方通行にできる。trueなら追加のみ、falseなら削除のみ。
   // isDarkThemeがtrueの場合、'dark-theme'クラスが無ければ追加、既に有れば何もしない、そのために第2引数をtrueにする。
 
-  return isDarkTheme
-}
+  return isDarkTheme;
+};
 
-checkDefaultTheme()
+checkDefaultTheme();
 // ダークモードの設定はページ全体に影響を与えるため、トップページに記載する。
 // localStorageに'darkTheme'が保管されることで、毎回の利用時にデフォルトのダークモード選択が適用される。
 
@@ -59,17 +62,21 @@ const router = createBrowserRouter([
       {
         path: 'register',
         element: <Register />,
-        action: registerAction
-        // formをsubmitした場合の処理を規定する。
-        // actionに記載するFnでは、必ず何かをreturnする必要がある。
+        action: registerAction,
+        // action関数は、formをsubmitした場合の処理Fnを規定する。必ず何かをreturnする必要あり。
+        // ここでactionを定義することもできるが、見にくくなるからRagisterの方に書いてインポートしてる。
       },
       {
         path: 'login',
         element: <Login />,
+        action: loginAction,
       },
       {
         path: 'dashboard',
         element: <DashboardLayout />,
+        loader: dashboardLoader,
+        // loader関数は、elementをレンダーする前に実行され、returnされた値はコンポ内で使用できる。
+        // useEffectの場合はコンポーネントのレンダー開始後にFetchするが、loaderはレンダー開始時点で既に使える状態。
         children: [
           // children in children。/dashboardにアクセスがあったら、indexの<AddJob />が開く。
           {

@@ -3,20 +3,20 @@ import User from '../models/UserModel.js';
 import Job from '../models/JobModel.js';
 
 export const getCurrentUser = async (req, res) => {
-  const user = await User.findOne({ _id: req.user.userId });
+  const userWithPassword = await User.findOne({ _id: req.user.userId });
   // 先にauthenticateUserミドルが呼ばれてるから、verifyJWT後でreq.userが付いた状態で呼び出される。
   // ミドルとコントローラー間は一つのrequestとして扱われるが、一連が終わればreqは終了し、ユーザー情報もreqと共に消える。
   // findById()でOk。findOneを使う場合は、idにはアンダーバーをつけることに留意。
-  const userWithoutPassword = user.toJSON();
+  const user = userWithPassword.toJSON();
   // toJSONは、UserSchemaにおいてpasswordを除くように上書きしている。
-  res.status(StatusCodes.OK).json({ userWithoutPassword });
+  res.status(StatusCodes.OK).json({ user });
 };
 
 export const getApplicationStats = async (req, res) => {
-  const users = await User.countDocuments()
+  const users = await User.countDocuments();
   // mongodbにおいて、テーブルはcollection、レコードはdocument。
   // モデル(collection)のレコード(document)の数を数えるメソッドがcountDocument()。
-  const jobs = await Job.countDocuments()
+  const jobs = await Job.countDocuments();
   res.status(StatusCodes.OK).json({ users, jobs });
   // usersとjobsの数を返している。
 };
@@ -33,5 +33,4 @@ export const updateUser = async (req, res) => {
     // findOneの時は toJSON してからres.jsonしたが、findByIdAndUpdateとはリターンされる形式が違うのか？
   });
   res.status(StatusCodes.OK).json({ updateUser });
-
 };

@@ -1,16 +1,38 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, redirect, useLoaderData, useNavigate } from 'react-router-dom';
 import Wrapper from '../assets/wrappers/Dashboard';
 import { Navbar, BigSidebar, SmallSidebar } from '../components';
 import { createContext, useContext, useState } from 'react';
 import { checkDefaultTheme } from '../App';
+import customFetch from '../utils/customFetch';
+import { toast } from 'react-toastify';
 
 const DashboardContext = createContext();
 // global contextを使う場合、createContextから作ったProviderで全体を囲う。
 // contextで使いたいstateをProviderのvalueに渡し、使う際にはuseContext()で呼び出す。
 // このケースのglobal stateであれば、少ないからcontextは使わずにpropsで渡してもOK。
 
+export const loader = async () => {
+  try {
+    // const {data} = await customFetch.get('/users/current-user')
+    const { data } = await customFetch.get('/users/current-user');
+    // axios.getで返ってくるオブジェクトにはdata, status, header等が入っているから、dataをdestructureする。
+    // dataの中に、サーバーからres.jsonされた{user: user情報}が入っている。
+    return data;
+  } catch (error) {
+    // サーバー側でuserRouterに行く前にauthenticateUserミドルでtokenのチェックをしてるため、tokenエラーが有ればcatchされる。
+    return redirect('/');
+    // useNavigateはコンポの中でしか使えないから、action関数とloader関数内ではredirectを使う。
+  }
+  // actionと同様に、loader関数は必ず何かをreturnすること。catchも然り。
+};
+
 const DashboardLayout = () => {
-  const user = { name: 'suzu' };
+  const { user } = useLoaderData();
+  // loader内の変数(ここではdata)にアクセスする場合に使うフック。
+  // const data = useLoaderData()と、dataオブジェクトからuserをdestructureする処理をまとめて行なってる。
+  const navigate = useNavigate();
+  // 紛らわしいが、useNavigationは主にrouteのaction実行時の状態管理(submitting, loading)するのに使われる。
+  // useNavigateはroute内の画面遷移の際に使われる。
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(checkDefaultTheme());
   // useState()の初期値を決める関数は、マウント時に一回だけ実行される。
@@ -38,13 +60,16 @@ const DashboardLayout = () => {
   };
 
   const logoutUser = async () => {
-    console.log('logout user');
+    navigate('/');
+    await customFetch.get('/auth/logout');
+    toast.success('Logiing out...');
   };
 
   return (
     <DashboardContext.Provider
       value={{
         user,
+        // loaderによりapiから取得したcurrentUser
         showSidebar,
         isDarkTheme,
         toggleDarkTheme,
@@ -62,8 +87,8 @@ const DashboardLayout = () => {
           <div>
             <Navbar />
             <div className="dashboard-page">
-              <Outlet />
-              {/* Outletの中では、react-router独自のglobal contextを使えるからuseContextは不要。 */}
+              <Outlet context={{ user }} />
+              {/* contextを渡すことで、Outletに表示される各コンポにおいてuserを使える。useContext不要 */}
             </div>
           </div>
         </main>
