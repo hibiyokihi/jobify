@@ -88,7 +88,8 @@ const DashboardLayout = () => {
             <Navbar />
             <div className="dashboard-page">
               <Outlet context={{ user }} />
-              {/* contextを渡すことで、Outletに表示される各コンポにおいてuserを使える。useContext不要 */}
+              {/* useOutletContextを使って、Outletに表示される各コンポでcontextを使える。valueではなくcontext。 */}
+              {/* useContextを使うとProviderで囲う必要があるが、それが不要。 */}
             </div>
           </div>
         </main>

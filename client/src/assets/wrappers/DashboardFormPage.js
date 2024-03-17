@@ -20,6 +20,7 @@ const Wrapper = styled.section`
     margin-bottom: 0;
   }
   .form-center {
+    // 小さい画面の時は1列グリッド
     display: grid;
     row-gap: 1rem;
   }
@@ -32,6 +33,7 @@ const Wrapper = styled.section`
   @media (min-width: 992px) {
     .form-center {
       grid-template-columns: 1fr 1fr;
+      // 中サイズ画面の時は2列グリッド
       align-items: center;
       column-gap: 1rem;
     }
@@ -39,6 +41,7 @@ const Wrapper = styled.section`
   @media (min-width: 1120px) {
     .form-center {
       grid-template-columns: 1fr 1fr 1fr;
+      // 大きい画面の時は3列グリッド
     }
   }
 `;
