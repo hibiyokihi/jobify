@@ -37,8 +37,15 @@ const Job = ({
           {/* jobStatusは、pending, interview, declinedが入り、index.cssでスタイリングしてる */}
         </div>
         <footer className="actions">
-          <Link className="btn edit-btn">Edit</Link>
-          <Form>
+          <Link to={`../edit-job/${_id}`} className="btn edit-btn">
+            {/* dashboard/all-jobsの階層にいるから、dashboard/edit-jobに行くには一つ上る必要がある。 */}
+            {/* 絶対パスで/dashboard/edit-jobと書いても良い。 */}
+            Edit
+          </Link>
+          <Form method='post' action={`../delete-job/${_id}`}>
+            {/* deleteにはelementが無く、all-jobsのpathにあるこのFormからdelete-jobのpathにあるactionに処理を託す。
+            よって、Formにactionパラムを置き、actionのあるpathを指定する。 */}
+            {/* methodはget又はpost。deleteの場合もpostにする。 */}
             <button type="submit" className="btn delete-btn">
               Delete
             </button>

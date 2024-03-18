@@ -11,6 +11,7 @@ import {
   AllJobs,
   Profile,
   Admin,
+  EditJob,
 } from './pages';
 // pages/index.jsからまとめてインポートしている。ファイル名の指定が無ければデフォルトでindex.jsから探してくる。
 // index.jsに集約しないと、page毎にインポートを記載する必要があるから行数が多くなる。
@@ -22,6 +23,10 @@ import { action as loginAction } from './pages/Login';
 import { loader as dashboardLoader } from './pages/DashboardLayout';
 import { action as addJobAction } from './pages/AddJob';
 import { loader as allJobsLoader } from './pages/AllJobs';
+import { loader as editJobLoader } from './pages/EditJob';
+import { action as editJobAction } from './pages/EditJob';
+import { action as deleteJobAction } from './pages/DeleteJob';
+
 
 export const checkDefaultTheme = () => {
   // DashboardLayout.jsxでも使うからエクスポートしてる。
@@ -45,6 +50,7 @@ checkDefaultTheme();
 // localStorageに'darkTheme'が保管されることで、毎回の利用時にデフォルトのダークモード選択が適用される。
 
 const router = createBrowserRouter([
+  // 以下のrouteはreact-routeであり、サーバー側のexpress-routeとは異なる。
   {
     path: '/',
     element: <HomeLayout />,
@@ -102,6 +108,21 @@ const router = createBrowserRouter([
           {
             path: 'admin',
             element: <Admin />,
+          },
+          {
+            path: 'edit-job/:id',
+            element: <EditJob />,
+            loader: editJobLoader,
+            // EditJobをレンダーする前にidにマッチするjobをfetchする。
+            action: editJobAction,
+          },
+          {
+            path: 'delete-job/:id',
+            action: deleteJobAction
+            // 今回はdelete用のページは作らないため、elementは無し。
+            // actionは、通常は同じpath内のFormからsubmitされたformDataを受けて処理を実行する。(Formにactionパラムの記載は不要)
+            // deleteの場合はelementが無く、all-jobsのpathにあるFormからdelete-jobのpathにあるactionに処理を託す。
+            // よって、all-jobsにあるFormにはactionパラムを置き、actionのあるpathを指定する。
           },
         ],
       },

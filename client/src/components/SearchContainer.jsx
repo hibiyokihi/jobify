@@ -7,7 +7,6 @@ import { useAllJobsContext } from '../pages/AllJobs';
 
 const SearchContainer = () => {
   const {data} = useAllJobsContext()
-  console.log(data)
 
   return (
     <Wrapper>
