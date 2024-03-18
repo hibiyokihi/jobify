@@ -20,6 +20,8 @@ import { action as registerAction } from './pages/Register';
 // RegisterとLoginで同じ名前(action)でexportすることで、コードを再利用できる。
 import { action as loginAction } from './pages/Login';
 import { loader as dashboardLoader } from './pages/DashboardLayout';
+import { action as addJobAction } from './pages/AddJob';
+import { loader as allJobsLoader } from './pages/AllJobs';
 
 export const checkDefaultTheme = () => {
   // DashboardLayout.jsxでも使うからエクスポートしてる。
@@ -82,10 +84,12 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <AddJob />,
+            action: addJobAction,
           },
           {
             path: 'all-jobs',
             element: <AllJobs />,
+            loader: allJobsLoader,
           },
           {
             path: 'stats',

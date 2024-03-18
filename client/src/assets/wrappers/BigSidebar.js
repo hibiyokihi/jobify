@@ -65,7 +65,7 @@ const Wrapper = styled.aside`
     .pending {
       background: var(--background-color);
     }
-    /* react-routerのNavLinkによる状態管理クラスの中には、activeの他にpendingがあるようだ */
+    /* react-routerのNavLinkによる状態管理クラスの中に、active, pending, transitioningがある。 */
   }
 `;
 export default Wrapper;

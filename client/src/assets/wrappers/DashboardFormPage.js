@@ -41,7 +41,8 @@ const Wrapper = styled.section`
   @media (min-width: 1120px) {
     .form-center {
       grid-template-columns: 1fr 1fr 1fr;
-      // 大きい画面の時は3列グリッド
+      // 大きい画面の時は3列グリッド。
+      // columnsを上書きするだけで、align-items, column-gapは992px以上の設定が引き継がれる。
     }
   }
 `;

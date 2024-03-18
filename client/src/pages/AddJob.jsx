@@ -6,6 +6,21 @@ import { Form, useNavigation, redirect } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import customFetch from '../utils/customFetch';
 
+export const action = async ({ request }) => {
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
+
+  try {
+    await customFetch.post('/jobs', data);
+    toast.success('Job added successfully');
+    return redirect('all-jobs');
+    // 相対パスの場合は頭に/を付けない。絶対パスで/dashboard/all-jobsと書いても良い。
+  } catch (error) {
+    toast.error(error?.response?.data?.msg);
+    return error;
+  }
+};
+
 const AddJob = () => {
   const user = useOutletContext();
   // Outletのcontextに入れたものを呼び出して使えるフック。

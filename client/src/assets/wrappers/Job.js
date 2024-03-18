@@ -5,12 +5,15 @@ const Wrapper = styled.article`
   border-radius: var(--border-radius);
   display: grid;
   grid-template-rows: 1fr auto;
+  /* headerとcontent(centerとfooter)の２要素を、1列２行で表示する。template-rowsであることに注意 */
+  /* content(centerとfooter)の高さを変えずに、header部分で調整される */
   box-shadow: var(--shadow-2);
   header {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--grey-100);
     display: grid;
     grid-template-columns: auto 1fr;
+    /* 2列グリッドでアイコンの幅は変えずにテキスト部分で調整する */
     align-items: center;
   }
   .main-icon {
@@ -18,6 +21,7 @@ const Wrapper = styled.article`
     height: 60px;
     display: grid;
     place-items: center;
+    /* アイコンの文字を中央に配置するためのグリッド使用 */
     background: var(--primary-500);
     border-radius: var(--border-radius);
     font-size: 1.5rem;
@@ -41,10 +45,11 @@ const Wrapper = styled.article`
     padding: 1rem 1.5rem;
   }
   .content-center {
-    display: grid;
     margin-top: 1rem;
     margin-bottom: 1.5rem;
+    display: grid;
     grid-template-columns: 1fr;
+    /* タブレットサイズ以下の場合は1列グリッド。その他は2列グリッド。 */
     row-gap: 1.5rem;
     align-items: center;
     @media (min-width: 576px) {
@@ -60,11 +65,13 @@ const Wrapper = styled.article`
     height: 30px;
     display: grid;
     align-items: center;
+    /* backgroundとcolorは、jobStatusに応じてindex.cssで設定される */
   }
   .actions {
     margin-top: 1rem;
     display: flex;
     align-items: center;
+    /* ボタンを横並びに上下中央に */
   }
   .edit-btn,
   .delete-btn {
