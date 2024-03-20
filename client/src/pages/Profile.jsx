@@ -20,7 +20,7 @@ export const action = async ({ request }) => {
     // action内で処理が完結する際には必ず何かをreturnすること。
   }
   try {
-    await customFetch.patch('/user/update-user', formData);
+    await customFetch.patch('/users/update-user', formData);
     // オブジェクト形式に変換後のdataではなく、formDataをそのまま送ることに注意。
     toast.success('profile updated successfully');
   } catch (error) {
@@ -37,9 +37,8 @@ const Profile = () => {
 
   return (
     <Wrapper>
-      <Form method="post" className="form" encType='multipart/form-data'>
-        {/* formDataにfileが含まれる場合は、encTypeを変更する。
-        これにより、jsonに変換せずにformDataのままサーバーに送信できる */}
+      <Form method="post" className="form" encType="multipart/form-data">
+        {/* formDataにfileが含まれる場合は、multipart/form-dataでエンコードしてactionにrequestを送る。 */}
         <h4 className="form-title">profile</h4>
         <div className="form-center">
           <div className="form-row">
