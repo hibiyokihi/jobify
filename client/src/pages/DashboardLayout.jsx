@@ -28,8 +28,8 @@ export const loader = async () => {
 
 const DashboardLayout = () => {
   const { user } = useLoaderData();
-  // loader内の変数(ここではdata)にアクセスする場合に使うフック。
-  // const data = useLoaderData()と、dataオブジェクトからuserをdestructureする処理をまとめて行なってる。
+  // loaderがリターンした値にアクセスする場合に使うフック。
+  // ここでは、returnされたdataからuserをdestructureする処理をまとめている。
   const navigate = useNavigate();
   // 紛らわしいが、useNavigationは主にrouteのaction実行時の状態管理(submitting, loading)するのに使われる。
   // useNavigateはroute内の画面遷移の際に使われる。

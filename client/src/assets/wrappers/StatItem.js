@@ -4,6 +4,8 @@ const Wrapper = styled.article`
   padding: 2rem;
   background: var(--background-secondary-color);
   border-bottom: 5px solid ${(props) => props.color};
+  /* styled-componentの中でpropsを使えば、Wrapper呼び出しの際に渡したpropsにアクセスできる */
+  /* styled-componentはtemplate-stringを使ってるから、$を使えばJSを書ける */
   border-radius: var(--border-radius);
 
   header {

@@ -15,14 +15,35 @@ import jobRouter from './routes/jobRouter.js';
 import authRouter from './routes/authRouter.js';
 import userRouter from './routes/userRouter.js';
 
+import path from 'path'
+import { dirname} from 'path';
+import { fileURLToPath } from 'url';
+
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
 import { authenticateUser } from './middleware/authMiddleware.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+// 開発中はlocalhostのpathを使っているが、productionでは本番用のpathに変わる。
+// よって、ファイルの場所はダイナミックに取得される必要がある。
+// commonJS(CJS)では、__filenameでそのファイルのpath、__dirnameでそのファイルがあるdirectoryのpathにアクセスできる。
+// EJSでは、import.meta.urlでファイルpathを取得できるが、CJSの__filenameや__dirnameと同じようには使えない。
+// node.jsはまだCJSをベースに動いており、CJSに合わせないと動作しない点がある。本件はその一部。
+// よって、EJSを使う場合はCJSに合わせて__dirnameを定義する必要がある。上記の処理は、以下の2つをまとめたもの。
+  // const __filename = fileUrlToPath(import.meta.url);
+  // const __dirname = path.dirname(__filename);
+    // path.dirnameは、引数に渡したfile-pathが入っているdirectoryのパスを取得する。
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   // コンソールにrequestの結果をログ表示するミドルウェア。リクエストエラーの原因把握に有用。引数には所定のオプションを指定。
   // production環境ではログ表示は不要だから、開発環境でのみmorganが動くようにする。それがdevオプション。
 }
+
+app.use(express.static(path.resolve(__dirname, './public')))
+// express.staticは、image,CSS等のstaticファイルの置き場所を指定するもの。
+// path.resolveは、引数に渡したpathを絶対パスにして返すもの。引数を2つ渡すとjoinしてくれる。__dirnameは上記で規定したもの。
+// server.jsの置かれているdirectory(__dirname)の直下にあるpublicフォルダがStaticの探し場所となる。
+// publicフォルダに入れた画像は、http://localhost:5100/avatar-1.jpg のようにサーバー側のポートと画像名でアクセスできる。
 
 app.use(cookieParser());
 

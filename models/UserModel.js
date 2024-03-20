@@ -17,16 +17,18 @@ const UserSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  avatar: String,
+  avatarPublicId: String,
 });
 
-UserSchema.methods.toJSON = function(){
-  let obj = this.toObject()
+UserSchema.methods.toJSON = function () {
+  let obj = this.toObject();
   // resの際にpasswordを除きたいからtoJSONメソッドを上書きする。
   // 呼び出し元のUserインスタンス(this)をオブジェクト形式に変換する。これによりobj.passwordでパスワードにアクセスできる。
   // この後でobjの中身を変更するからletを使う。
-  delete obj.password
-  return obj
-}
+  delete obj.password;
+  return obj;
+};
 // Userインスタンスからパスワードを取り除くカスタムメソッドをUserSchemaに規定する。toJSONは任意のメソッド名。
 // instanceメソッド：そのモデルのインスタンスが使えるメソッド　⇔ staticメソッド：全てのモデルが使えるメソッド
 // 関数の書き方として、function(){}を使う場合は、そのインスタンスのことをthisで表せる。allowFnではthisを使えない。
