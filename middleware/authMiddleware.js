@@ -1,4 +1,8 @@
-import { UnauthenticatedError } from '../errors/customErrors.js';
+import {
+  UnauthenticatedError,
+  UnauthorizedError,
+  BadRequestError,
+} from '../errors/customErrors.js';
 import { verifyJWT } from '../utils/tokenUtils.js';
 
 export const authenticateUser = (req, res, next) => {
@@ -11,7 +15,9 @@ export const authenticateUser = (req, res, next) => {
 
   try {
     const { userId, role } = verifyJWT(token);
-    req.user = { userId, role };
+    const testUser = userId === '65fbdd58263a5518a4c791cf';
+    // postmanでテストユーザーを作って、そのuserIdをmongoDBから探してコピペした。
+    req.user = { userId, role, testUser };
     next();
     // user情報がダイレクトに取り出せるのは危険だから、cookieにはtokenを保存し、tokenの中にユーザー情報が含まれるようにする。
     // jwt.signで作られたtokenは、jwt.verifyでのみ中身のpayloadを取り出せる。
@@ -39,3 +45,9 @@ export const authorizePermissions =
     }
     next();
   };
+
+export const checkForTestUser = (req, res, next) => {
+  if (req.user.testUser) throw new BadRequestError('Demo User. Read only...');
+  // ログインユーザーのuserIdがテストユーザーのidと一致する場合、testUserがtrueになってる。
+  next();
+};

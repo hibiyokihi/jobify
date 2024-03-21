@@ -1,11 +1,11 @@
 import {
   Form,
   redirect,
-  useNavigation,
   Link,
+  useNavigate,
 } from 'react-router-dom';
 import Wrapper from '../assets/wrappers/RegisterAndLoginPage';
-import { Logo, FormRow } from '../components';
+import { Logo, FormRow, SubmitBtn } from '../components';
 import customFetch from '../utils/customFetch';
 import { toast } from 'react-toastify';
 
@@ -34,10 +34,26 @@ export const action = async ({ request }) => {
 };
 
 const Login = () => {
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === 'submitting';
   // const errors = useActionData()
   // action内の変数にアクセスする場合のuseActionData()の使用例。今回は使わない。
+  const navigate = useNavigate()
+  const loginDemoUser = async () => {
+    try {
+      const data = {
+        "email": "test@test.com",
+        "password": "secret123",
+        // テストユーザーは、事前にPostmanでregister済み
+      }
+      await customFetch.post('/auth/login', data);
+      toast.success('Test user login function');
+      navigate('/dashboard')
+      // コンポ内だからuseNavigateが使える。
+    } catch (error) {
+      toast.error(error?.response?.data?.msg);
+
+    }
+  }
+
   return (
     <Wrapper>
       <Form method="post" className="form">
@@ -47,11 +63,13 @@ const Login = () => {
         <FormRow type="password" name="password" defaultValue="test123" />
         {/* defaultValueを設定してるのは、テストする時にいちいち入力する手間を省くため。本番用では消す。 */}
 
-        <button type="submit" className="btn btn-block" disabled={isSubmitting}>
-          {isSubmitting ? 'submitting...' : 'submit'}
-        </button>
-        <button type="button" className="btn btn-block">
-          explor the app
+        <SubmitBtn />
+        <button type="button" className="btn btn-block" onClick={loginDemoUser}>
+          explore the app
+          {/* テストユーザー用のログインボタン。App内の各機能をチェックするためにテストユーザーでログインして試す目的。
+          SubmitBtnからログインした場合は、Formのsubmitが実行されてrequestがactionに送られてログインプロセスに入る。
+          exploreボタンを押した場合は、submitは実行されずにloginDemoUserからログインプロセスに入る。
+          テストユーザーには機能に制限を設ける */}
         </button>
         <p>
           Not a member yet?

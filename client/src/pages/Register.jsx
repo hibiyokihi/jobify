@@ -1,6 +1,6 @@
-import { Form, redirect, useNavigation, Link } from 'react-router-dom';
+import { Form, redirect, Link } from 'react-router-dom';
 import Wrapper from '../assets/wrappers/RegisterAndLoginPage';
-import { Logo, FormRow } from '../components';
+import { Logo, FormRow, SubmitBtn } from '../components';
 import customFetch from '../utils/customFetch';
 import { toast } from 'react-toastify';
 
@@ -28,10 +28,7 @@ export const action = async ({ request }) => {
 };
 
 const Register = () => {
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === 'submitting';
-  // submittingは、route内でFormをsubmitしてactionが実行中の状態。
-  // loadingは、次のrouteに遷移するためにエレメントをレンダー中の状態。
+
   return (
     <Wrapper>
       <Form method="post" className="form">
@@ -51,9 +48,7 @@ const Register = () => {
         <FormRow type="password" name="password" defaultValue="test123123" />
         {/* defaultValueを設定してるのは、テストする時にいちいち入力する手間を省くため。本番用では消す。 */}
 
-        <button type="submit" className="btn btn-block" disabled={isSubmitting}>
-          {isSubmitting ? 'submitting...' : 'submit'}
-        </button>
+        <SubmitBtn />
         <p>
           Already a member?
           <Link to="/login" className="member-btn">

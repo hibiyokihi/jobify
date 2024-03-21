@@ -6,18 +6,29 @@ import {
   updateUser,
 } from '../controllers/userController.js';
 import { validateUpdateUserInput } from '../middleware/validationMiddleware.js';
-import { authorizePermissions } from '../middleware/authMiddleware.js';
+import {
+  authorizePermissions,
+  checkForTestUser,
+} from '../middleware/authMiddleware.js';
 import upload from '../middleware/multerMiddleware.js';
 
 const router = Router();
 router.get('/current-user', getCurrentUser);
 router.get('/admin/app-stats', [
   authorizePermissions('admin'),
-  // 権限を持つroleを限定する。ここではadminのroleを持つユーザーのみがnextされるようにしている。
+  // 権限を持つroleを限定する。ここではadminのroleを持たないユーザーからのリクエストをエラーにする。
+  // adminしかアクセス権限がないから、checkForTestUserは不要。
   getApplicationStats,
 ]);
 // []で囲むかは好みで、付けなくてもOK。ここではミドルとコントローラーの関係が見やすいように[]で囲っている。
-router.patch('/update-user', upload.single('avatar'), validateUpdateUserInput, updateUser);
+router.patch(
+  '/update-user',
+  checkForTestUser,
+  upload.single('avatar'),
+  validateUpdateUserInput,
+  updateUser
+);
+// テストユーザーはupdateUserできないように、checkForTestUserミドルを置く。
 // このリクエストはJSONではなくformDataが multipart/form-dataでエンコードされて送られてくる。
 // multerは、destinationに指定されたpathに、filenameに指定された名前でfileを格納する。
 // ここではmulterが処理するfileは一つだからupload.single。引数はfileのinput要素に付けたname。
