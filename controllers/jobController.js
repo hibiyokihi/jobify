@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import day from 'dayjs';
 
 export const getAllJobs = async (req, res) => {
-  const { search, jobStatus, jobType } = req.query;
+  const { search, jobStatus, jobType, sort } = req.query;
   // urlに続けてクエリが入ってリクエストされた場合(/jobs?search=xxx)、サーバー側ではreq.query.searchでxxxにアクセスできる。
   const queryObject = {
     createdBy: req.user.userId,
@@ -25,17 +25,51 @@ export const getAllJobs = async (req, res) => {
     // $regexについて勉強が必要。上記の場合、例えばsearchの入力内容がaの場合、aを含む全てがマッチする。(これで良いかは要検討)
   }
   if (jobStatus && jobStatus !== 'all') {
-    queryObject.jobStatus = jobStatus
+    queryObject.jobStatus = jobStatus;
   }
+  // allが選択された場合は、queryObjectには追加しない。つまりfindする際のフィルター項目としてjobStatusは省く。
   if (jobType && jobType !== 'all') {
-    queryObject.jobType = jobType
+    queryObject.jobType = jobType;
   }
 
-  const jobs = await Job.find(queryObject);
+  const sortOptions = {
+    newest: '-createdAt',
+    oldest: 'createdAt',
+    'a-z': 'position',
+    'z-a': '-position',
+  };
+  // utils.constants.jsにて、これらの値を定数に定めている。
+
+  const sortKey = sortOptions[sort] || sortOptions.newest;
+  // sortOptions.sortとしてしまうと、オブジェクトの中からsortキーを探してしまうから、変数を使う場合は[]を使う。
+
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  // pageとlimitはstringではなくNumber形式にする必要があるから、上段のdestructureとは別に行なっている。
+  // limitは、1ページに表示する数を指定する。このプロジェクトではデフォルトの10を使うが、フロント側でアレンジすることも可能。
+  const skip = (page - 1) * limit;
+  // 例えば2ページ目の場合、skipは10になる。つまり最初の10個をスキップして11個目からlimitの10個を表示する。
+
+  const jobs = await Job.find(queryObject)
+    .sort(sortKey)
+    .skip(skip)
+    .limit(limit);
   // 先にauthenticateUserミドルが呼ばれてるから、verifyJWT後でreq.user(.userId)が付いた状態で呼び出される。
-  // ミドルとコントローラー間は一つのrequestとして扱われるが、一連が終わればreqは終了し、ユーザー情報もreqと共に消える。
+  // ミドルとコントローラー間は一つのrequestとして扱われるが、一連が終わればreqは終了し、req.user情報もreqと共に消える。
   // mongoDBのfindメソッドはfindAllのこと。条件にマッチするものは全て取得される。
-  res.status(StatusCodes.OK).json({ jobs });
+  // sortは、フィールド名をstringで入れて、descendingの場合はマイナスを頭につける。
+  // limitはfindで取得するインスタンスの数を制限する。
+  // skip(1)とした場合。、1つ目のインスタンスをスキップして2つ目から取得する。
+
+  const totalJobs = await Job.countDocuments(queryObject);
+  // findだけでなく、オブジェクト数を数えるcountDocumentsでもフィルターを引数に入れられる。
+  // jobsはlimitで指定した数のjobが含まれるのに対し、totalJobsはlimitに関係なく合計数のままであることに留意。
+
+  const numOfPages = Math.ceil(totalJobs / limit);
+
+  res
+    .status(StatusCodes.OK)
+    .json({ totalJobs, numOfPages, currentPage: page, jobs });
 };
 
 export const createJob = async (req, res) => {
