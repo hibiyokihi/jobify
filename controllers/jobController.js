@@ -5,9 +5,36 @@ import mongoose from 'mongoose';
 import day from 'dayjs';
 
 export const getAllJobs = async (req, res) => {
-  const jobs = await Job.find({ createdBy: req.user.userId });
-  // 先にauthenticateUserミドルが呼ばれてるから、verifyJWT後でreq.userが付いた状態で呼び出される。
+  const { search, jobStatus, jobType } = req.query;
+  // urlに続けてクエリが入ってリクエストされた場合(/jobs?search=xxx)、サーバー側ではreq.query.searchでxxxにアクセスできる。
+  const queryObject = {
+    createdBy: req.user.userId,
+    // findメソッドで複数条件をつける場合、$andと$orオペレーターが使われるが、条件を並べて書いた場合には$andと同じ扱いになる。
+    // 仮に、position: req.query.searchをオブジェクトに追加した場合、両方の条件がマッチしたものをfindはリターンする。
+  };
+  if (search) {
+    queryObject.$or = [
+      { position: { $regex: search, $options: 'i' } },
+      { company: { $regex: search, $options: 'i' } },
+    ];
+    // クエリにsearchが無かった場合は、createdByだけでfindを実行する。
+    // createdByがマッチした上で、search入力内容がposition又はcompanyにマッチするものをfindが返す。A and (B or C)
+    // queryObjectに、$or: [{position: ...}, {company: ...}] が追加される。
+    // $orはmongoDBのオペレーターで、Array要素のいずれかがtrueならtrueを返す。
+    // $regexは、$optionsと合わせて使う。options:i は、大文字小文字の区別をしない(Case-Insensibile)。
+    // $regexについて勉強が必要。上記の場合、例えばsearchの入力内容がaの場合、aを含む全てがマッチする。(これで良いかは要検討)
+  }
+  if (jobStatus && jobStatus !== 'all') {
+    queryObject.jobStatus = jobStatus
+  }
+  if (jobType && jobType !== 'all') {
+    queryObject.jobType = jobType
+  }
+
+  const jobs = await Job.find(queryObject);
+  // 先にauthenticateUserミドルが呼ばれてるから、verifyJWT後でreq.user(.userId)が付いた状態で呼び出される。
   // ミドルとコントローラー間は一つのrequestとして扱われるが、一連が終わればreqは終了し、ユーザー情報もreqと共に消える。
+  // mongoDBのfindメソッドはfindAllのこと。条件にマッチするものは全て取得される。
   res.status(StatusCodes.OK).json({ jobs });
 };
 
@@ -77,20 +104,45 @@ export const showStats = async (req, res) => {
     declined: stats.declined || 0,
     // 該当項目が無い場合にはゼロを表示したいから、statsをそのまま返さずに上記のようにする。
   };
-  let monthlyApplications = [
+
+  let monthlyApplications = await Job.aggregate([
+    { $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) } },
     {
-      date: 'May 23',
-      count: 12,
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+        // _id: $createdAtとしてしまうと、日付ごとにグルーピングされてしまう。ここでは年と月単位でグルーピングしたい。
+        // $yearはdateからyearを取ってきてグルーピングする。yearは任意の変数名。
+        // 同様にmonthの条件も付ければ、年と月でグルーピングされる。
+        count: { $sum: 1 },
+      },
     },
-    {
-      date: 'Jun 23',
-      count: 10,
-    },
-    {
-      date: 'Jul 23',
-      count: 3,
-    },
-  ];
-  // res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications });
+    { $sort: { '_id.year': -1, '_id.month': -1 } },
+    // .yearの部分は、group-stageで_idに設定した変数名に合わせる。-1はdescending-order。
+    // フロントの表示はAscendingにしたいが、直近の６ヶ月を取得したいから、一旦Descendingにする必要がある。
+    { $limit: 6 },
+    // リターンする結果の上限数を設定する。
+  ]);
+
+  monthlyApplications = monthlyApplications
+    // フロント側でrechartsライブラリを使ってチャートを表示するため、サーバー側でrechartsのdata形式に整えておく必要がある。
+    .map((item) => {
+      const {
+        _id: { year, month },
+        count,
+      } = item;
+      // _idをdestructureして、_idからyear, monthをdestructureしても良い。このように１行でも書ける。
+      const date = day()
+        .month(month - 1)
+        .year(year)
+        .format('MMM YY');
+      // day.jsは月はゼロから始まるから１をひく。NodeJSでは１から始まる。
+      return { date, count };
+    })
+    .reverse();
+  // 上記で直近６ヶ月を取得するためにDescendingにしたから、ここでAscendingに戻す。
+
   res.status(StatusCodes.OK).json({ defaultStats, monthlyApplications });
 };

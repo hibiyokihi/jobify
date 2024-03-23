@@ -1,18 +1,26 @@
-import { toast } from 'react-toastify';
 import customFetch from '../utils/customFetch';
+import { StatsContainer, ChartsContainer } from '../components';
+import { useLoaderData } from 'react-router-dom';
 
 export const loader = async () => {
   try {
-    const stats = await customFetch.get('/jobs/stats');
-    console.log(stats)
-    return stats;
+    const response = await customFetch.get('/jobs/stats');
+    return response.data;
   } catch (error) {
-    toast.error(error?.response?.data?.msg);
     return error;
   }
 };
 
 const Stats = () => {
-  return <h1>Stats</h1>;
+  const { defaultStats, monthlyApplications } = useLoaderData();
+
+  return (
+    <>
+      <StatsContainer defaultStats={defaultStats} />
+      {monthlyApplications?.length > 1 && (
+        <ChartsContainer data={monthlyApplications} />
+      )}
+    </>
+  );
 };
 export default Stats;
