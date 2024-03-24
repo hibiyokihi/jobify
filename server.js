@@ -16,8 +16,8 @@ import jobRouter from './routes/jobRouter.js';
 import authRouter from './routes/authRouter.js';
 import userRouter from './routes/userRouter.js';
 
-import path from 'path'
-import { dirname} from 'path';
+import path from 'path';
+import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import errorHandlerMiddleware from './middleware/errorHandlerMiddleware.js';
@@ -29,16 +29,16 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET,
 });
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = dirname(fileURLToPath(import.meta.url));
 // 開発中はlocalhostのpathを使っているが、productionでは本番用のpathに変わる。
 // よって、ファイルの場所はダイナミックに取得される必要がある。
 // commonJS(CJS)では、__filenameでそのファイルのpath、__dirnameでそのファイルがあるdirectoryのpathにアクセスできる。
 // EJSでは、import.meta.urlでファイルpathを取得できるが、CJSの__filenameや__dirnameと同じようには使えない。
 // node.jsはまだCJSをベースに動いており、CJSに合わせないと動作しない点がある。本件はその一部。
 // よって、EJSを使う場合はCJSに合わせて__dirnameを定義する必要がある。上記の処理は、以下の2つをまとめたもの。
-  // const __filename = fileUrlToPath(import.meta.url);
-  // const __dirname = path.dirname(__filename);
-    // path.dirnameは、引数に渡したfile-pathが入っているdirectoryのパスを取得する。
+// const __filename = fileUrlToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// path.dirnameは、引数に渡したfile-pathが入っているdirectoryのパスを取得する。
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -46,12 +46,10 @@ if (process.env.NODE_ENV === 'development') {
   // production環境ではログ表示は不要だから、開発環境でのみmorganが動くようにする。それがdevオプション。
 }
 
-app.use(express.static(path.resolve(__dirname, './public')))
-// express.staticは、imageファイル, CSSファイル, build後のコード等の置き場所を指定するもの。
-// publicフォルダに置いたファイルは、publicly-available。よって本番サーバーからもアクセスできる。
+app.use(express.static(path.resolve(__dirname, './client/dist')));
+// express.staticは、build後のファイルの置き場所を指定するもの。
+// viteを使ってnpm-run-buildすると、distフォルダにdeploy用のindex.htmlやindex.js等が作成される。よってこれを指定。
 // path.resolveは、引数に渡したpathを絶対パスにして返すもの。引数を2つ渡すとjoinしてくれる。__dirnameは上記で規定したもの。
-// server.jsの置かれているdirectory(__dirname)の直下にあるpublicフォルダがStaticの探し場所となる。
-// publicフォルダに入れた画像は、http://localhost:5100/avatar-1.jpg のようにサーバー側のポートと画像名でアクセスできる。
 
 app.use(cookieParser());
 
@@ -67,7 +65,6 @@ app.get('/api/v1/test', (req, res) => {
 });
 
 app.use('/api/v1/jobs', authenticateUser, jobRouter);
-
 // '/api/v1/jobs'がjobRouterのprefix。
 // /api/v1/jobs/ にget,postがあった場合の対応、/api/v1/jobs/:idにget,patch,deleteがあった場合の対応をJobRouterが規定。
 // authenticateUserは、tokenによるログイン状態をチェックするミドルウェア。
@@ -83,11 +80,9 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', authenticateUser, userRouter);
 
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, './public', 'index.html'))
-  // express.static()で指定したpublicフォルダはpublicly-availableだから、本番サーバーからアクセス可能。
-  // viteでnpm-run-buildすると、distフォルダにdeploy用のファイルが作成され、これらをpublicフォルダに移す。
-  // サーバーはpublicの中にあるindex.htmlをフロントに送り、Asset内にあるindex.js等を使ってフロントと交信する。
-})
+  res.sendFile(path.resolve(__dirname, './client/dist', 'index.html'));
+  // viteでnpm-run-buildする際に作成されるdistフォルダのindex.htmlをサーバーからフロントに返す。
+});
 // 開発が完了し、productionに移行する時に書くコード。全てのエンドポイントの後、404の前に書く。
 
 app.use('*', (req, res) => {
