@@ -19,7 +19,7 @@ export const action = async ({ request }) => {
     return redirect('/login');
     // route内の画面遷移には通常useNavigateを使うが、フックはコンポの中でしか使えないから、action関数内ではredirectを使う。
   } catch (error) {
-    toast.error(error?.response?.data?.msg)
+    toast.error(error?.response?.data?.msg);
     // axiosでフェッチ中にエラーが生じた場合、errorにはAxiosErrorが入る。
     // AxiosError.response.data.msgにエラーメッセージが入っている。念の為?でバグ回避。
     return error;
@@ -28,7 +28,6 @@ export const action = async ({ request }) => {
 };
 
 const Register = () => {
-
   return (
     <Wrapper>
       <Form method="post" className="form">
@@ -36,17 +35,16 @@ const Register = () => {
         {/* Formのデフォルトのmethodはget。ここではpostを指定する。 */}
         <Logo />
         <h4>Register</h4>
-        <FormRow type="text" name="name" defaultValue="Suzu" />
+        <FormRow type="text" name="name" />
         <FormRow
           type="text"
           name="lastName"
           labelText="last name"
           defaultValue="Hirose"
         />
-        <FormRow type="text" name="location" defaultValue="Tokyo" />
-        <FormRow type="email" name="email" defaultValue="suzu@example.com" />
-        <FormRow type="password" name="password" defaultValue="test123123" />
-        {/* defaultValueを設定してるのは、テストする時にいちいち入力する手間を省くため。本番用では消す。 */}
+        <FormRow type="text" name="location" />
+        <FormRow type="email" name="email" />
+        <FormRow type="password" name="password" />
 
         <SubmitBtn />
         <p>
