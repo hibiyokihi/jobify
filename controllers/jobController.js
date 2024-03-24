@@ -6,6 +6,7 @@ import day from 'dayjs';
 
 export const getAllJobs = async (req, res) => {
   const { search, jobStatus, jobType, sort } = req.query;
+  console.log(req.query);
   // urlに続けてクエリが入ってリクエストされた場合(/jobs?search=xxx)、サーバー側ではreq.query.searchでxxxにアクセスできる。
   const queryObject = {
     createdBy: req.user.userId,

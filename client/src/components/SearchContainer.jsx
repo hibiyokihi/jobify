@@ -26,7 +26,7 @@ const SearchContainer = () => {
       // e.currentTargetは、このFormRow(search)。
       // e.currentTarget.formは、このFormRowが含まれるForm全体。よってForm全体をsubmitする。
       clearTimeout(timeout);
-      // 2秒待ってる間に次のonChangeが発生すると不具合が起きるから、onChangeが発生する度に前回のtimeoutをクリアして設定し直す。
+      // 0.5秒待ってる間に次のonChangeが発生すると不具合が起きるから、onChangeが発生する度に前回のtimeoutをクリアして設定し直す。
       timeout = setTimeout(() => {
         onChange(form);
       }, 500);
