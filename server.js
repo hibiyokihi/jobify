@@ -47,7 +47,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.static(path.resolve(__dirname, './public')))
-// express.staticは、image,CSS等のstaticファイルの置き場所を指定するもの。
+// express.staticは、imageファイル, CSSファイル, build後のコード等の置き場所を指定するもの。
+// publicフォルダに置いたファイルは、publicly-available。よって本番サーバーからもアクセスできる。
 // path.resolveは、引数に渡したpathを絶対パスにして返すもの。引数を2つ渡すとjoinしてくれる。__dirnameは上記で規定したもの。
 // server.jsの置かれているdirectory(__dirname)の直下にあるpublicフォルダがStaticの探し場所となる。
 // publicフォルダに入れた画像は、http://localhost:5100/avatar-1.jpg のようにサーバー側のポートと画像名でアクセスできる。
@@ -80,6 +81,14 @@ app.use('/api/v1/auth', authRouter);
 // フロントはそのcookieを一定期間保存して、request時にはreq.cookiesを含めてAPIにリクエストする。
 
 app.use('/api/v1/users', authenticateUser, userRouter);
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, './public', 'index.html'))
+  // express.static()で指定したpublicフォルダはpublicly-availableだから、本番サーバーからアクセス可能。
+  // viteでnpm-run-buildすると、distフォルダにdeploy用のファイルが作成され、これらをpublicフォルダに移す。
+  // サーバーはpublicの中にあるindex.htmlをフロントに送り、Asset内にあるindex.js等を使ってフロントと交信する。
+})
+// 開発が完了し、productionに移行する時に書くコード。全てのエンドポイントの後、404の前に書く。
 
 app.use('*', (req, res) => {
   res.status(404).json({ msg: 'not found' });
