@@ -24,14 +24,18 @@ router.get('/admin/app-stats', [
 router.patch(
   '/update-user',
   checkForTestUser,
+  // テストユーザーはupdateUserできないように、checkForTestUserミドルを置く。
   upload.single('avatar'),
+  // multerの機能で、指定した画像ファイルをbufferデータにしてメモリ上に一時保管する。
+  // multerはreq.fileプロパティを作り、上記のメモリデータを参照する。
   validateUpdateUserInput,
+  // このリクエストはJSONではなくformDataが multipart/form-dataでエンコードされて送られてくる。
   updateUser
 );
-// テストユーザーはupdateUserできないように、checkForTestUserミドルを置く。
-// このリクエストはJSONではなくformDataが multipart/form-dataでエンコードされて送られてくる。
-// multerは、destinationに指定されたpathに、filenameに指定された名前でfileを格納する。
-// ここではmulterが処理するfileは一つだからupload.single。引数はfileのinput要素に付けたname。
-// controllerの前にmulterを通すことで、'avatar'の名前のついたfileにreq.fileでアクセスできるようになる。
+
+// 下記はmulterのdiskStorageを使った場合の説明。今回はmemoryStorageを使うが、一応メモとして残す。
+  // multerは、destinationに指定されたpathに、filenameに指定された名前でfileを格納する。
+  // ここではmulterが処理するfileは一つだからupload.single。引数はfileのinput要素に付けたname。
+  // controllerの前にmulterを通すことで、'avatar'の名前のついたfileにreq.fileでアクセスできるようになる。
 
 export default router;

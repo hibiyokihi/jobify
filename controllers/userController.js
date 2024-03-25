@@ -2,9 +2,11 @@ import { StatusCodes } from 'http-status-codes';
 import User from '../models/UserModel.js';
 import Job from '../models/JobModel.js';
 import cloudinary from 'cloudinary';
-import { promises as fs } from 'fs';
+import { formatImage } from '../middleware/multerMiddleware.js';
+
+// import { promises as fs } from 'fs';
 // fsモジュールにはsync方式とasync方式のAPIが含まれ、async方式のAPIはfs/promisesという別モジュール名でも参照できる。
-// fs/promises.unlinkはpromiseを返す。ここではこちらを採用。
+// fs/promises.unlinkはpromiseを返す。→ コードの修正により、今回は使わなかった。
 
 export const getCurrentUser = async (req, res) => {
   const userWithPassword = await User.findOne({ _id: req.user.userId });
@@ -27,22 +29,25 @@ export const getApplicationStats = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const newUser = { ...req.body };
-  // req.bodyにはfile以外のformDataが入っている？
+  // req.bodyはfile以外のformDataを参照してる。multerミドルによってreq.fileが作られて、fileはそちらが参照。
   // 下記にてpasswordを除き、newUserにavatarとavatarPublicIdのプロパティを加えて、Userモデルをアップデートする。
   delete newUser.password;
   // パスワードはハッシュ処理する必要があるため、他のユーザー情報と同じようにupdateすることはできない。
   // ユーザー登録(register)時と同様にbcryptでハッシュ処理すれば良いが、パスワード変更は別で行われるのが一般的。
   if (req.file) {
-    // userをupdateする際、avatarを選択しない場合もある。その場合はcloudinaryの処理は不要。
-    // multerをミドルで通してるから、送られてきたformDataにfileがあればreq.fileでアクセスできる。
-    const response = await cloudinary.v2.uploader.upload(req.file.path);
-    // profileのupdateを送信すると、まずmulterミドルがpublic/uploadにfileをuploadする。
-    // multerは、requestにfile.pathを付け、fileのpathにアクセスできるようにする。
-    // cloudinaryがfile.pathを参照し、画像をクラウドにuploadする。
+    // req.fileが無い場合は、formDataに画像ファイルが無い。その場合はcloudinaryの処理は不要。
+    const file = formatImage(req.file)
+    // multerミドルによってバッファ化されたデータを、DataParserを使って元のファイル形式に戻している。
+    const response = await cloudinary.v2.uploader.upload(file);
+    // このuploadは、cloudinaryのupload。ファイルをクラウドにアップロードする。
     // cloudinaryはresponseオブジェクトを返し、必要な項目を下記にて取り出している。
-    await fs.unlink(req.file.path);
-    // クラウドへのuploadが完了したらpublicに残っている画像は不要だから削除(unlink)する。
-    // async型のfsをインポートしてるから、unlinkはプロミスを返す。よってawaitする必要がある。
+
+    // 下記はmulterのdiskStorageを使った場合の説明。今回はmemoryStorageを使うが、一応メモとして残す。
+      // profileのupdateを送信すると、まずmulterミドルがpublic/uploadにfileをuploadする。
+      // multerは、requestにfile.pathを付け、fileのpathにアクセスできるようにする。
+      // cloudinaryがfile.pathを参照し、画像をクラウドにuploadする。
+      // cloudinaryはresponseオブジェクトを返し、必要な項目を下記にて取り出している。
+
     newUser.avatar = response.secure_url;
     // cloudinaryは、クラウド上のfileの保存先のリンクをsecure_urlで渡してくれる。
     newUser.avatarPublicId = response.public_id;
